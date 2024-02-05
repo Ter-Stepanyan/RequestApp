@@ -6,3 +6,38 @@
 //
 
 import Foundation
+import UIKit
+
+class PersonTableViewCell: UITableViewCell {
+
+    @IBOutlet weak var customImageView: UIImageView!
+    @IBOutlet weak var nameLabel: UILabel!
+    @IBOutlet weak var genderLabel: UILabel!
+    @IBOutlet weak var countryLabel: UILabel!
+    @IBOutlet weak var streetLabel: UILabel!
+    
+    override func awakeFromNib() {
+            super.awakeFromNib()
+            customImageView.contentMode = .scaleAspectFill
+            customImageView.clipsToBounds = true
+        }
+
+        func configure(with person: Person) {
+            customImageView.layer.cornerRadius = 10
+            nameLabel.text = "\(person.name.first) \(person.name.last)"
+            genderLabel.text = "\(person.gender.capitalized), \(person.phone)"
+            countryLabel.text = person.location.country
+            streetLabel.text = "\(person.location.street.number) \(person.location.street.name)"
+
+            if let imageUrl = URL(string: person.picture.medium) {
+            let task = URLSession.shared.dataTask(with: imageUrl) { data, response, error in
+            if let data = data, let image = UIImage(data: data) {
+                DispatchQueue.main.async {
+                        self.customImageView.image = image
+                    }
+                }
+            }
+            task.resume()
+        }
+    }
+}
