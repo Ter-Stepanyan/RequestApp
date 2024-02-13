@@ -27,7 +27,7 @@ class PersonTableViewCell: UITableViewCell {
             nameLabel.text = "\(person.firstName) \(person.lastName)"
             genderLabel.text = "\(person.gender.capitalized), \(person.phone)"
             countryLabel.text = person.address.country
-            streetLabel.text = "\(person.address.street)"
+            streetLabel.text = "\(person.address.street.number) \(person.address.street.name)"
 
             if let imageUrl = URL(string: person.picture.mediumPicture) {
             let task = URLSession.shared.dataTask(with: imageUrl) { data, response, error in

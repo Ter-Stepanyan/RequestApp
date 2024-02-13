@@ -16,9 +16,9 @@
 		CED6C5D72B6A5C7600620BDC /* RequestUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED6C5D62B6A5C7600620BDC /* RequestUITests.swift */; };
 		CED6C5D92B6A5C7600620BDC /* RequestUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED6C5D82B6A5C7600620BDC /* RequestUITestsLaunchTests.swift */; };
 		CED6C5E92B6A6E0000620BDC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CED6C5E82B6A6E0000620BDC /* Main.storyboard */; };
-		CED6C5EB2B6A7F5E00620BDC /* CustomTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED6C5EA2B6A7F5E00620BDC /* CustomTableViewCell.swift */; };
 		CED6C5ED2B6CF4A700620BDC /* PersonTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED6C5EC2B6CF4A700620BDC /* PersonTableViewCell.swift */; };
 		CED6C5EF2B6D0A2B00620BDC /* PersonTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = CED6C5EE2B6D0A2B00620BDC /* PersonTableViewCell.xib */; };
+		CED6C72A2B7A61FB00620BDC /* DetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED6C7292B7A61FB00620BDC /* DetailsViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,9 +52,9 @@
 		CED6C5D62B6A5C7600620BDC /* RequestUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestUITests.swift; sourceTree = "<group>"; };
 		CED6C5D82B6A5C7600620BDC /* RequestUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		CED6C5E82B6A6E0000620BDC /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
-		CED6C5EA2B6A7F5E00620BDC /* CustomTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTableViewCell.swift; sourceTree = "<group>"; };
 		CED6C5EC2B6CF4A700620BDC /* PersonTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonTableViewCell.swift; sourceTree = "<group>"; };
 		CED6C5EE2B6D0A2B00620BDC /* PersonTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = PersonTableViewCell.xib; sourceTree = "<group>"; };
+		CED6C7292B7A61FB00620BDC /* DetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailsViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,8 +108,8 @@
 				CED6C5B52B6A5C7200620BDC /* AppDelegate.swift */,
 				CED6C5B72B6A5C7200620BDC /* SceneDelegate.swift */,
 				CED6C5EC2B6CF4A700620BDC /* PersonTableViewCell.swift */,
-				CED6C5EA2B6A7F5E00620BDC /* CustomTableViewCell.swift */,
 				CED6C5B92B6A5C7200620BDC /* ViewController.swift */,
+				CED6C7292B7A61FB00620BDC /* DetailsViewController.swift */,
 				CED6C5BE2B6A5C7600620BDC /* Assets.xcassets */,
 				CED6C5E82B6A6E0000620BDC /* Main.storyboard */,
 				CED6C5C02B6A5C7600620BDC /* LaunchScreen.storyboard */,
@@ -291,9 +291,9 @@
 			files = (
 				CED6C5BA2B6A5C7200620BDC /* ViewController.swift in Sources */,
 				CED6C5B62B6A5C7200620BDC /* AppDelegate.swift in Sources */,
-				CED6C5EB2B6A7F5E00620BDC /* CustomTableViewCell.swift in Sources */,
 				CED6C5ED2B6CF4A700620BDC /* PersonTableViewCell.swift in Sources */,
 				CED6C5B82B6A5C7200620BDC /* SceneDelegate.swift in Sources */,
+				CED6C72A2B7A61FB00620BDC /* DetailsViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -467,6 +467,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = CRGZ46Q5T5;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Request/Info.plist;
@@ -496,6 +497,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = CRGZ46Q5T5;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Request/Info.plist;

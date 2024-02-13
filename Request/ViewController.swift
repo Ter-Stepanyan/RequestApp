@@ -12,6 +12,7 @@ class ViewController: UIViewController {
     private let url = "https://randomuser.me/api?seed=artak&results=20"
     @IBOutlet weak var personTableView: UITableView!
     @IBOutlet weak var personSearchBar: UISearchBar!
+    weak var delegate: PersonDelegate?
 
     var personData: [Person] = []
 
@@ -27,6 +28,15 @@ class ViewController: UIViewController {
             self.personData = data
             DispatchQueue.main.async {
                 self.personTableView.reloadData()
+            }
+        }
+    }
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "toDetails" {
+            if let destinationVC = segue.destination as? DetailsViewController,
+               let indexPath = personTableView.indexPathForSelectedRow {
+                let selectedPerson = personData[indexPath.row]
+                destinationVC.selectedPerson = selectedPerson
             }
         }
     }
@@ -74,6 +84,12 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
 
         return cell ?? UITableViewCell()
     }
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedPerson = personData[indexPath.row]
+        self.delegate?.didSelectPerson(selectedPerson)
+        performSegue(withIdentifier: "toDetails", sender: delegate)
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
 }
 
 extension ViewController: UISearchBarDelegate {
@@ -97,11 +113,20 @@ extension ViewController: UISearchBarDelegate {
     }
 }
 
-struct Response: Codable {
+extension ViewController: PersonDelegate {
+    func didSelectPerson(_ person: Person) {
+        let detailsVC = storyboard?.instantiateViewController(
+            withIdentifier: "DetailsViewController") as? DetailsViewController
+        detailsVC?.selectedPerson = person
+        navigationController?.pushViewController(detailsVC!, animated: true)
+    }
+}
+
+struct Response: Decodable {
     let results: [Person]
 }
 
-struct Person: Codable {
+struct Person: Decodable {
     let gender: String
     let firstName: String
     let lastName: String
@@ -136,41 +161,19 @@ struct Person: Codable {
         firstName = try nameContainer.decode(String.self, forKey: .first)
         lastName = try nameContainer.decode(String.self, forKey: .last)
     }
-
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-
-        try container.encode(gender, forKey: .gender)
-
-        var nameContainer = container.nestedContainer(keyedBy: NameCodingKeys.self, forKey: .name)
-
-        try nameContainer.encode(firstName, forKey: .first)
-        try nameContainer.encode(lastName, forKey: .last)
-    }
 }
 
 struct Address: Codable {
-    let street: String
+    let street: Street
     let city: String
     let country: String
+    let coordinates: Coordinates
 
     enum CodingKeys: String, CodingKey {
         case street
         case city
         case country
-    }
-
-    enum StreetCodingKeys: String, CodingKey {
-        case name
-    }
-
-    init(from decoder: Decoder) throws {
-
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        let streetContainer = try container.nestedContainer(keyedBy: StreetCodingKeys.self, forKey: .street)
-        self.street = try streetContainer.decode(String.self, forKey: .name)
-        self.city = try container.decode(String.self, forKey: .city)
-        self.country = try container.decode(String.self, forKey: .country)
+        case coordinates
     }
 }
 
@@ -179,11 +182,18 @@ struct Street: Codable {
     let name: String
 }
 
+struct Coordinates: Codable {
+    let latitude: String
+    let longitude: String
+}
+
 struct Picture: Codable {
 
+    let largePicture: String
     let mediumPicture: String
 
     enum CodingKeys: String, CodingKey {
+        case largePicture = "large"
         case mediumPicture = "medium"
     }
 }
