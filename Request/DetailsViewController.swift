@@ -7,6 +7,7 @@
 
 import UIKit
 import MapKit
+import CoreData
 
 protocol PersonDelegate: AnyObject {
     func didSelectPerson(_ person: Person)
@@ -18,24 +19,34 @@ class DetailsViewController: UIViewController {
     @IBOutlet weak var userImageView: UIImageView!
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var genderLabel: UILabel!
-    @IBOutlet weak var phoneLabel: UILabel!
-    @IBOutlet weak var addressLabel: UILabel!
+    @IBOutlet weak var phoneButton: UIButton!
+    @IBOutlet weak var addressButton: UIButton!
+    @IBOutlet weak var addFavouriteButton: UIButton!
+    @IBOutlet weak var removeButton: UIButton!
     weak var delegate: PersonDelegate?
     var selectedPerson: Person?
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        guard let person = selectedPerson else {
-            return
-        }
-
+        guard let person = selectedPerson else { return }
         setMap(person: person)
         setLabels(person: person)
         setImageView(pictureUrl: person.picture.largePicture)
+        addressButton.titleLabel?.numberOfLines = 3
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if selectedPerson!.isFavourite {
+            addFavouriteButton.isEnabled = false
+            addFavouriteButton.backgroundColor = UIColor.lightGray
+        } else {
+            addFavouriteButton.isEnabled = true
+            addFavouriteButton.backgroundColor = UIColor.darkGreen
+        }
     }
 
     private func setMap(person: Person) {
-
         if let latitude = Double(person.address.coordinates.latitude),
            let longitude = Double(person.address.coordinates.longitude) {
             let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
@@ -49,50 +60,52 @@ class DetailsViewController: UIViewController {
     }
 
     private func setLabels(person: Person) {
-
         nameLabel.text = "\(person.firstName) \(person.lastName)"
         genderLabel.text = person.gender.capitalized
 
         let attributedPhoneNumber = NSMutableAttributedString(string: person.phone)
         attributedPhoneNumber.addAttribute(.foregroundColor,
-        value: UIColor.blue,
-        range: NSRange(location: 0, length: attributedPhoneNumber.length)
+                                           value: UIColor.blue,
+                                           range: NSRange(location: 0, length: attributedPhoneNumber.length)
         )
         attributedPhoneNumber.addAttribute(.underlineStyle,
-        value: NSUnderlineStyle.single.rawValue,
-        range: NSRange(location: 0, length: attributedPhoneNumber.length)
+                                           value: NSUnderlineStyle.single.rawValue,
+                                           range: NSRange(location: 0, length: attributedPhoneNumber.length)
         )
-
-        phoneLabel.attributedText = attributedPhoneNumber
-        let phoneTapGesture = UITapGestureRecognizer(target: self, action: #selector(phoneLabelTapped))
-        phoneLabel.isUserInteractionEnabled = true
-        phoneLabel.addGestureRecognizer(phoneTapGesture)
+        phoneButton.setAttributedTitle(attributedPhoneNumber, for: .normal)
+        phoneButton.titleLabel?.textAlignment = .right
+        phoneButton.contentHorizontalAlignment = .right
+        phoneButton.titleLabel?.font = UIFont.systemFont(ofSize: 17)
+        phoneButton.titleLabel?.lineBreakMode = .byWordWrapping
 
         let attributedAddress = NSMutableAttributedString(
-            string: "\(person.address.street.name), \(person.address.city), \(person.address.country)"
+            string: "\(person.address.country), \(person.address.street.number) \(person.address.street.name)"
         )
         attributedAddress.addAttribute(.foregroundColor,
-        value: UIColor.blue,
-        range: NSRange(location: 0, length: attributedAddress.length)
+                                       value: UIColor.blue,
+                                       range: NSRange(location: 0, length: attributedAddress.length)
         )
         attributedAddress.addAttribute(.underlineStyle,
-        value: NSUnderlineStyle.single.rawValue,
-        range: NSRange(location: 0, length: attributedAddress.length)
+                                       value: NSUnderlineStyle.single.rawValue,
+                                       range: NSRange(location: 0, length: attributedAddress.length)
         )
+        addressButton.titleLabel?.numberOfLines = 0
+        addressButton.setAttributedTitle(attributedAddress, for: .normal)
+        addressButton.titleLabel?.textAlignment = .right
+        addressButton.contentHorizontalAlignment = .right
+        addressButton.titleLabel?.font = UIFont.systemFont(ofSize: 17)
+        addressButton.titleLabel?.lineBreakMode = .byWordWrapping
+        addFavouriteButton.layer.cornerRadius = 28
+        removeButton.setTitle("Remove from Favourites", for: .normal)
+        removeButton.setTitle("           ", for: .disabled)
 
-        addressLabel.attributedText = attributedAddress
-        addressLabel.numberOfLines = 0
-        addressLabel.textAlignment = .right
-        addressLabel.widthAnchor.constraint(equalToConstant: 180).isActive = true
-        addressLabel.sizeToFit()
-        addressLabel.frame.origin = CGPoint(x: view.bounds.width - addressLabel.frame.width, y: 0)
-        let addressTapGesture = UITapGestureRecognizer(target: self, action: #selector(addressLabelTapped))
-        addressLabel.isUserInteractionEnabled = true
-        addressLabel.addGestureRecognizer(addressTapGesture)
+        if !person.isFavourite {
+            addFavouriteButton.isEnabled = true
+            removeButton.isEnabled = false
+        }
     }
 
     private func setImageView(pictureUrl: String) {
-
         userImageView.layer.cornerRadius = userImageView.frame.size.width / 2
         userImageView.clipsToBounds = true
         if let url = URL(string: pictureUrl) {
@@ -106,31 +119,69 @@ class DetailsViewController: UIViewController {
         }
     }
 
-    @objc private func phoneLabelTapped() {
-        guard let phoneNumberWithoutParentheses = phoneLabel.text?.replacingOccurrences(of: "(", with: "")
+    @IBAction func callTheNumber(_ sender: Any) {
+        guard let phoneNumberWithoutParentheses = phoneButton.titleLabel?.text?.replacingOccurrences(of: "(", with: "")
             .replacingOccurrences(of: ")", with: "")
             .replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "-", with: "")
-        else {
-            return
-        }
+        else { return }
 
-        guard let phoneURL = URL(string: "tel://\(phoneNumberWithoutParentheses)") else {
-            return
-        }
+        guard let phoneURL = URL(string: "tel://\(phoneNumberWithoutParentheses)") else { return }
         UIApplication.shared.open(phoneURL, options: [:], completionHandler: nil)
     }
 
-    @objc private func addressLabelTapped() {
-        guard let addressText = addressLabel.text else {
-            return
-        }
-
-        guard let encodedAddress = addressText.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
-            return
-        }
+    @IBAction func openMap(_ sender: Any) {
+        guard let addressText = addressButton.titleLabel?.text else { return }
+        guard let encodedAddress = addressText.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+        else { return }
 
         if let mapsURL = URL(string: "http://maps.apple.com/?address=\(encodedAddress)") {
             UIApplication.shared.open(mapsURL, options: [:], completionHandler: nil)
         }
+    }
+
+    private func toggleFavouriteStatus(forPersonWithID id: NSManagedObjectID) {
+            do {
+                let person = try ViewController.context.existingObject(with: id) as? PersonEntity
+                person!.isFavourite.toggle()
+                try ViewController.context.save()
+                print("isFavourite status toggled for PersonEntity with ID: \(id)")
+            } catch {
+                print("Error toggling isFavourite status: \(error.localizedDescription)")
+            }
+        }
+
+        func getObjectID(forPerson person: Person) -> NSManagedObjectID? {
+            let fetchRequest: NSFetchRequest<PersonEntity> = PersonEntity.fetchRequest()
+            fetchRequest.predicate = NSPredicate(
+                format: "firstName == %@ AND lastName == %@", person.firstName, person.lastName
+            )
+
+            do {
+                let result = try ViewController.context.fetch(fetchRequest)
+                if let personEntity = result.first {
+                    return personEntity.objectID
+                }
+            } catch {
+                print("Error fetching PersonEntity: \(error.localizedDescription)")
+            }
+            return nil
+        }
+
+        @IBAction func addToFavourite(_ sender: Any) {
+            toggleFavouriteStatus(forPersonWithID: getObjectID(forPerson: selectedPerson!)!)
+            addFavouriteButton.setTitle("Person is Favourite", for: .disabled)
+            addFavouriteButton.backgroundColor = UIColor.lightGray
+            addFavouriteButton.isEnabled = false
+            addFavouriteButton.setTitleColor(UIColor.black, for: .disabled)
+            removeButton.isEnabled = true
+    }
+
+    @IBAction func removeFromFavourite(_ sender: Any) {
+        toggleFavouriteStatus(forPersonWithID: getObjectID(forPerson: selectedPerson!)!)
+        addFavouriteButton.isEnabled = true
+        addFavouriteButton.setTitle("Add to Favourites", for: .normal)
+        addFavouriteButton.setTitleColor(UIColor.white, for: .normal)
+        addFavouriteButton.backgroundColor = UIColor.darkGreen
+        removeButton.isEnabled = false
     }
 }
