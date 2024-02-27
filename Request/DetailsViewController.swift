@@ -18,21 +18,24 @@ class DetailsViewController: UIViewController {
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var userImageView: UIImageView!
     @IBOutlet weak var nameLabel: UILabel!
-    @IBOutlet weak var genderLabel: UILabel!
-    @IBOutlet weak var phoneButton: UIButton!
-    @IBOutlet weak var addressButton: UIButton!
     @IBOutlet weak var addFavouriteButton: UIButton!
+    @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var removeButton: UIButton!
     weak var delegate: PersonDelegate?
     var selectedPerson: Person?
+    var coreDataManager: CoreDataManager!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         guard let person = selectedPerson else { return }
+        let nib = UINib(nibName: "DetailsCollectionViewCell", bundle: nil)
+        collectionView.register(nib, forCellWithReuseIdentifier: "detailsCell")
         setMap(person: person)
         setLabels(person: person)
         setImageView(pictureUrl: person.picture.largePicture)
-        addressButton.titleLabel?.numberOfLines = 3
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(imageTapped))
+                userImageView.isUserInteractionEnabled = true
+                userImageView.addGestureRecognizer(tapGesture)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -44,6 +47,18 @@ class DetailsViewController: UIViewController {
             addFavouriteButton.isEnabled = true
             addFavouriteButton.backgroundColor = UIColor.darkGreen
         }
+    }
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "showImage",
+           let imageViewController = segue.destination as? ImageViewController,
+           let imageUrl = selectedPerson?.picture.largePicture {
+            imageViewController.imageUrl = imageUrl
+        }
+    }
+
+    @objc func imageTapped() {
+        performSegue(withIdentifier: "showImage", sender: self)
     }
 
     private func setMap(person: Person) {
@@ -61,43 +76,9 @@ class DetailsViewController: UIViewController {
 
     private func setLabels(person: Person) {
         nameLabel.text = "\(person.firstName) \(person.lastName)"
-        genderLabel.text = person.gender.capitalized
-
-        let attributedPhoneNumber = NSMutableAttributedString(string: person.phone)
-        attributedPhoneNumber.addAttribute(.foregroundColor,
-                                           value: UIColor.blue,
-                                           range: NSRange(location: 0, length: attributedPhoneNumber.length)
-        )
-        attributedPhoneNumber.addAttribute(.underlineStyle,
-                                           value: NSUnderlineStyle.single.rawValue,
-                                           range: NSRange(location: 0, length: attributedPhoneNumber.length)
-        )
-        phoneButton.setAttributedTitle(attributedPhoneNumber, for: .normal)
-        phoneButton.titleLabel?.textAlignment = .right
-        phoneButton.contentHorizontalAlignment = .right
-        phoneButton.titleLabel?.font = UIFont.systemFont(ofSize: 17)
-        phoneButton.titleLabel?.lineBreakMode = .byWordWrapping
-
-        let attributedAddress = NSMutableAttributedString(
-            string: "\(person.address.country), \(person.address.street.number) \(person.address.street.name)"
-        )
-        attributedAddress.addAttribute(.foregroundColor,
-                                       value: UIColor.blue,
-                                       range: NSRange(location: 0, length: attributedAddress.length)
-        )
-        attributedAddress.addAttribute(.underlineStyle,
-                                       value: NSUnderlineStyle.single.rawValue,
-                                       range: NSRange(location: 0, length: attributedAddress.length)
-        )
-        addressButton.titleLabel?.numberOfLines = 0
-        addressButton.setAttributedTitle(attributedAddress, for: .normal)
-        addressButton.titleLabel?.textAlignment = .right
-        addressButton.contentHorizontalAlignment = .right
-        addressButton.titleLabel?.font = UIFont.systemFont(ofSize: 17)
-        addressButton.titleLabel?.lineBreakMode = .byWordWrapping
         addFavouriteButton.layer.cornerRadius = 28
         removeButton.setTitle("Remove from Favourites", for: .normal)
-        removeButton.setTitle("           ", for: .disabled)
+        removeButton.setTitle(" ", for: .disabled)
 
         if !person.isFavourite {
             addFavouriteButton.isEnabled = true
@@ -119,55 +100,35 @@ class DetailsViewController: UIViewController {
         }
     }
 
-    @IBAction func callTheNumber(_ sender: Any) {
-        guard let phoneNumberWithoutParentheses = phoneButton.titleLabel?.text?.replacingOccurrences(of: "(", with: "")
-            .replacingOccurrences(of: ")", with: "")
-            .replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "-", with: "")
-        else { return }
-
-        guard let phoneURL = URL(string: "tel://\(phoneNumberWithoutParentheses)") else { return }
-        UIApplication.shared.open(phoneURL, options: [:], completionHandler: nil)
-    }
-
-    @IBAction func openMap(_ sender: Any) {
-        guard let addressText = addressButton.titleLabel?.text else { return }
-        guard let encodedAddress = addressText.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-        else { return }
-
-        if let mapsURL = URL(string: "http://maps.apple.com/?address=\(encodedAddress)") {
-            UIApplication.shared.open(mapsURL, options: [:], completionHandler: nil)
-        }
-    }
-
     private func toggleFavouriteStatus(forPersonWithID id: NSManagedObjectID) {
-            do {
-                let person = try ViewController.context.existingObject(with: id) as? PersonEntity
-                person!.isFavourite.toggle()
-                try ViewController.context.save()
-                print("isFavourite status toggled for PersonEntity with ID: \(id)")
-            } catch {
-                print("Error toggling isFavourite status: \(error.localizedDescription)")
+        do {
+            guard let person = try coreDataManager.context.existingObject(with: id) as? PersonEntity else {
+                print("Error: Failed to fetch PersonEntity with ID: \(id)")
+                return
             }
+            person.isFavourite.toggle()
+            coreDataManager.saveContext()
+            print("isFavourite status toggled for PersonEntity with ID: \(id)")
+        } catch {
+            print("Error toggling isFavourite status: \(error.localizedDescription)")
         }
+    }
 
-        func getObjectID(forPerson person: Person) -> NSManagedObjectID? {
-            let fetchRequest: NSFetchRequest<PersonEntity> = PersonEntity.fetchRequest()
-            fetchRequest.predicate = NSPredicate(
-                format: "firstName == %@ AND lastName == %@", person.firstName, person.lastName
-            )
-
-            do {
-                let result = try ViewController.context.fetch(fetchRequest)
-                if let personEntity = result.first {
-                    return personEntity.objectID
-                }
-            } catch {
-                print("Error fetching PersonEntity: \(error.localizedDescription)")
+    func getObjectID(forPerson person: Person) -> NSManagedObjectID? {
+        let fetchRequest: NSFetchRequest<PersonEntity> = PersonEntity.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "firstName == %@ AND lastName == %@", person.firstName, person.lastName)
+        do {
+            let result = try coreDataManager.context.fetch(fetchRequest)
+            if let personEntity = result.first {
+                return personEntity.objectID
             }
-            return nil
+        } catch {
+            print("Error fetching PersonEntity: \(error.localizedDescription)")
         }
+        return nil
+    }
 
-        @IBAction func addToFavourite(_ sender: Any) {
+    @IBAction func addToFavourite(_ sender: Any) {
             toggleFavouriteStatus(forPersonWithID: getObjectID(forPerson: selectedPerson!)!)
             addFavouriteButton.setTitle("Person is Favourite", for: .disabled)
             addFavouriteButton.backgroundColor = UIColor.lightGray
@@ -184,4 +145,26 @@ class DetailsViewController: UIViewController {
         addFavouriteButton.backgroundColor = UIColor.darkGreen
         removeButton.isEnabled = false
     }
+}
+
+extension DetailsViewController: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return 1
+    }
+
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "detailsCell", for: indexPath) as? DetailsCollectionViewCell else {
+            fatalError("Unable to dequeue DetailsCollectionViewCell")
+        }
+        let person = selectedPerson!
+        cell.configure(with: person)
+        return cell
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+           let width = collectionView.bounds.width
+           let height: CGFloat = 150
+
+           return CGSize(width: width, height: height)
+       }
 }

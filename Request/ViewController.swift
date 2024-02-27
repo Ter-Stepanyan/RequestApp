@@ -15,12 +15,10 @@ class ViewController: UIViewController {
     @IBOutlet weak var personSearchBar: UISearchBar!
     @IBOutlet weak var favouriteSwitch: UISwitch!
     weak var delegate: PersonDelegate?
-
     var personData: [Person] = []
     var hasParsedData = false
     var isDataFetched = false
-    static var context: NSManagedObjectContext!
-    static var appDelegate: AppDelegate?
+    var coreDataManager: CoreDataManager!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,12 +26,14 @@ class ViewController: UIViewController {
         personSearchBar.delegate = self
         let nib = UINib(nibName: "PersonTableViewCell", bundle: nil)
         personTableView.register(nib, forCellReuseIdentifier: "customCell")
-        initializeContext()
+        coreDataManager = CoreDataManager.shared
 
         if !hasParsedData {
             parseJson(from: url) { data in
                 if !data.isEmpty {
-                    self.saveDataToCoreData(data)
+                    for person in data {
+                        self.coreDataManager.savePersonToCoreData(person)
+                    }
                 }
                 DispatchQueue.main.async {
                     self.fetchData(isOn: self.favouriteSwitch.isOn)
@@ -54,6 +54,7 @@ class ViewController: UIViewController {
                let indexPath = personTableView.indexPathForSelectedRow {
                 let selectedPerson = personData[indexPath.row]
                 destinationVC.selectedPerson = selectedPerson
+                destinationVC.coreDataManager = coreDataManager
             }
         }
     }
@@ -78,116 +79,29 @@ class ViewController: UIViewController {
         task.resume()
     }
 
-    private func saveDataToCoreData(_ persons: [Person]) {
-
-        for person in persons {
-            let fetchRequest: NSFetchRequest<PersonEntity> = PersonEntity.fetchRequest()
-            fetchRequest.predicate = NSPredicate(
-                format: "firstName == %@ AND lastName == %@", person.firstName, person.lastName
-            )
-            do {
-                let existingPersons = try ViewController.context.fetch(fetchRequest)
-                if let existingPerson = existingPersons.first {
-                    existingPerson.gender = person.gender
-                    existingPerson.addressStreetNumber = person.address.street.number
-                    existingPerson.addressStreetName = person.address.street.name
-                    existingPerson.addressCity = person.address.city
-                    existingPerson.addressCountry = person.address.country
-                    existingPerson.addressCoordinatesLatitude = person.address.coordinates.latitude
-                    existingPerson.addressCoordinatesLongitude = person.address.coordinates.longitude
-                    existingPerson.phone = person.phone
-                    existingPerson.pictureLargePicture = person.picture.largePicture
-                    existingPerson.pictureMediumPicture = person.picture.mediumPicture
-                    print("Person updated in Core Data")
-                } else {
-                    let personEntity = PersonEntity(context: ViewController.context)
-                    personEntity.firstName = person.firstName
-                    personEntity.gender = person.gender
-                    personEntity.lastName = person.lastName
-                    personEntity.addressStreetNumber = person.address.street.number
-                    personEntity.addressStreetName = person.address.street.name
-                    personEntity.addressCity = person.address.city
-                    personEntity.addressCountry = person.address.country
-                    personEntity.addressCoordinatesLatitude = person.address.coordinates.latitude
-                    personEntity.addressCoordinatesLongitude = person.address.coordinates.longitude
-                    personEntity.phone = person.phone
-                    personEntity.pictureLargePicture = person.picture.largePicture
-                    personEntity.pictureMediumPicture = person.picture.mediumPicture
-                    personEntity.isFavourite = person.isFavourite
-                    print("Person saved to Core Data")
-                }
-                try ViewController.context.save()
-            } catch {
-                print("Error saving person to Core Data: \(error)")
-            }
-        }
-    }
-
-    private func fetchData(isOn: Bool) {
-        let fetchRequest: NSFetchRequest<PersonEntity> = PersonEntity.fetchRequest()
-
-        do {
-            let personEntities: [PersonEntity]
-            if !isOn {
-                personEntities = try ViewController.context.fetch(fetchRequest)
-            } else {
-                fetchRequest.predicate = NSPredicate(format: "isFavourite == true")
-                personEntities = try ViewController.context.fetch(fetchRequest)
-            }
-            personData = personEntities.map { personEntity in
-                return Person(
-                    gender: personEntity.gender ?? "",
-                    firstName: personEntity.firstName ?? "",
-                    lastName: personEntity.lastName ?? "",
-                    address: Address(
-                        street: Street(
-                            number: personEntity.addressStreetNumber,
-                            name: personEntity.addressStreetName ?? ""),
-                        city: personEntity.addressCity ?? "",
-                        country: personEntity.addressCountry ?? "",
-                        coordinates: Coordinates(
-                            latitude: personEntity.addressCoordinatesLatitude ?? "",
-                            longitude: personEntity.addressCoordinatesLongitude ?? "")
-                    ),
-                    phone: personEntity.phone ?? "",
-                    picture: Picture(
-                        largePicture: personEntity.pictureLargePicture ?? "",
-                        mediumPicture: personEntity.pictureMediumPicture ?? ""
-                    ),
-                    isFavourite: personEntity.isFavourite
-                )
-            }
-            isDataFetched = true
-            print("Successfully fetched data from Core Data")
-        } catch {
-            print("Error fetching data from Core Data: \(error)")
-        }
+    func fetchData(isOn: Bool) {
+        personData = coreDataManager.fetchData(isFavourite: isOn)
+        isDataFetched = true
         personData.sort { $0.firstName < $1.firstName }
-
         DispatchQueue.main.async {
             self.personTableView.reloadData()
         }
     }
 
+    @IBAction func toggleFavourites(_ sender: Any) {
+        fetchData(isOn: self.favouriteSwitch.isOn)
+    }
+
+    // Call this function, when there are duplicates while testing.
     private func clearDataFromCoreData() {
         let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "PersonEntity")
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
-
         do {
-            try ViewController.context.execute(deleteRequest)
+            try coreDataManager.context.execute(deleteRequest)
             print("Existing data cleared from Core Data")
         } catch {
             print("Error clearing existing data from Core Data: \(error)")
         }
-    }
-
-    private func initializeContext() {
-        ViewController.appDelegate = UIApplication.shared.delegate as? AppDelegate ?? nil
-        ViewController.context = ViewController.appDelegate?.persistentContainer.viewContext
-    }
-
-    @IBAction func toggleFavourites(_ sender: Any) {
-        fetchData(isOn: self.favouriteSwitch.isOn)
     }
 }
 
@@ -202,12 +116,12 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as? PersonTableViewCell
-
         let person = personData[indexPath.row]
         cell?.configure(with: person)
 
         return cell ?? UITableViewCell()
     }
+
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedPerson = personData[indexPath.row]
         self.delegate?.didSelectPerson(selectedPerson)

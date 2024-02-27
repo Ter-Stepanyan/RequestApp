@@ -10,9 +10,9 @@
         <attribute name="firstName" optional="YES" attributeType="String"/>
         <attribute name="gender" optional="YES" attributeType="String"/>
         <attribute name="isFavourite" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="largePicture" optional="YES" attributeType="String"/>
         <attribute name="lastName" optional="YES" attributeType="String"/>
+        <attribute name="mediumPicture" optional="YES" attributeType="String"/>
         <attribute name="phone" optional="YES" attributeType="String"/>
-        <attribute name="pictureLargePicture" optional="YES" attributeType="String"/>
-        <attribute name="pictureMediumPicture" optional="YES" attributeType="String"/>
     </entity>
 </model>

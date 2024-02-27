@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="22505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22504"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="collection view cell content view" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="NVh-1J-B2q" customClass="DetailsCollectionViewCell" customModule="Request" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="394" height="119"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="PRR-Bk-dos">
+                <rect key="frame" x="0.0" y="0.0" width="394" height="119"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="60B-lR-OPT">
+                        <rect key="frame" x="0.0" y="0.0" width="394" height="119"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" alpha="0.40000000000000002" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Female" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tkk-2V-i3p">
+                                <rect key="frame" x="320.66666666666669" y="6" width="55.333333333333314" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="7Ua-wW-DIH">
+                                <rect key="frame" x="235" y="36" width="150" height="37"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="150" id="Kau-Vl-fou"/>
+                                </constraints>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Telephone"/>
+                                <connections>
+                                    <action selector="callPhoneNumber:" destination="NVh-1J-B2q" eventType="touchUpInside" id="u9P-qg-ZXN"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="awY-yf-IEX">
+                                <rect key="frame" x="205" y="75" width="180" height="37"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="180" id="4C1-Sg-mV8"/>
+                                </constraints>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Address"/>
+                                <connections>
+                                    <action selector="openMap:" destination="NVh-1J-B2q" eventType="touchUpInside" id="2d8-4b-baB"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="7Ua-wW-DIH" secondAttribute="trailing" constant="9" id="0Gc-NA-kip"/>
+                            <constraint firstAttribute="trailing" secondItem="awY-yf-IEX" secondAttribute="trailing" constant="9" id="1IP-Vm-gyW"/>
+                            <constraint firstAttribute="trailing" secondItem="tkk-2V-i3p" secondAttribute="trailing" constant="18" id="857-L8-U1o"/>
+                            <constraint firstItem="7Ua-wW-DIH" firstAttribute="top" secondItem="tkk-2V-i3p" secondAttribute="bottom" constant="9" id="M2k-sU-15Y"/>
+                            <constraint firstItem="awY-yf-IEX" firstAttribute="top" secondItem="7Ua-wW-DIH" secondAttribute="bottom" constant="2" id="gkV-jS-yj4"/>
+                            <constraint firstItem="tkk-2V-i3p" firstAttribute="top" secondItem="60B-lR-OPT" secondAttribute="top" constant="6" id="ldb-hi-5pJ"/>
+                        </constraints>
+                    </view>
+                    <label opaque="NO" userInteractionEnabled="NO" alpha="0.40000000596046448" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Gender:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oG5-kr-tep">
+                        <rect key="frame" x="18" y="10" width="61" height="21"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" userInteractionEnabled="NO" alpha="0.40000000596046448" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Telephone:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1aX-r2-Bmu">
+                        <rect key="frame" x="18" y="46" width="84" height="21"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="21" id="AG5-rH-wyk"/>
+                            <constraint firstAttribute="width" constant="84" id="ueP-tT-39H"/>
+                        </constraints>
+                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <label opaque="NO" userInteractionEnabled="NO" alpha="0.40000000596046448" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Address:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1WM-k4-Gkd">
+                        <rect key="frame" x="18" y="82" width="68" height="21"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                        <nil key="textColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                </subviews>
+                <constraints>
+                    <constraint firstItem="1WM-k4-Gkd" firstAttribute="top" secondItem="1aX-r2-Bmu" secondAttribute="bottom" constant="15" id="3Lo-Kt-xLZ"/>
+                    <constraint firstAttribute="bottom" secondItem="60B-lR-OPT" secondAttribute="bottom" id="GCN-0h-KBf"/>
+                    <constraint firstItem="1aX-r2-Bmu" firstAttribute="top" secondItem="oG5-kr-tep" secondAttribute="bottom" constant="15" id="JC8-jB-V0m"/>
+                    <constraint firstItem="1WM-k4-Gkd" firstAttribute="leading" secondItem="PRR-Bk-dos" secondAttribute="leading" constant="18" id="PmU-XT-t7Y"/>
+                    <constraint firstItem="oG5-kr-tep" firstAttribute="leading" secondItem="PRR-Bk-dos" secondAttribute="leading" constant="18" id="VW4-AR-qHj"/>
+                    <constraint firstAttribute="trailing" secondItem="60B-lR-OPT" secondAttribute="trailing" id="Xu1-SX-TVf"/>
+                    <constraint firstItem="60B-lR-OPT" firstAttribute="top" secondItem="PRR-Bk-dos" secondAttribute="top" id="a1s-Ge-zhp"/>
+                    <constraint firstItem="1aX-r2-Bmu" firstAttribute="leading" secondItem="PRR-Bk-dos" secondAttribute="leading" constant="18" id="ebN-7y-HUw"/>
+                    <constraint firstItem="oG5-kr-tep" firstAttribute="top" secondItem="PRR-Bk-dos" secondAttribute="top" constant="10" id="kBi-hp-4wi"/>
+                    <constraint firstItem="60B-lR-OPT" firstAttribute="leading" secondItem="PRR-Bk-dos" secondAttribute="leading" id="w73-hO-ukn"/>
+                </constraints>
+            </collectionViewCellContentView>
+            <size key="customSize" width="446" height="119"/>
+            <connections>
+                <outlet property="addressButton" destination="awY-yf-IEX" id="Tx0-Ng-aoi"/>
+                <outlet property="genderLabel" destination="tkk-2V-i3p" id="D8g-nD-QKK"/>
+                <outlet property="phoneButton" destination="7Ua-wW-DIH" id="k82-4Q-peq"/>
+            </connections>
+            <point key="canvasLocation" x="-157.25190839694656" y="-52.464788732394368"/>
+        </collectionViewCell>
+    </objects>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
